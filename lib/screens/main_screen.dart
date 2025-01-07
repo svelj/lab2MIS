@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/api_services.dart';
+import 'favorite_jokes_screen.dart';
 import 'jokes_by_type_screen.dart';
+import '../models/joke.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -9,11 +11,19 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late Future<List<String>> jokeTypes;
+  List<Joke> favoriteJokes = [];  // Store the favorite jokes
 
   @override
   void initState() {
     super.initState();
     jokeTypes = ApiService.fetchJokeTypes();
+  }
+
+  // Function to add joke to favorite list
+  void addFavoriteJoke(Joke joke) {
+    setState(() {
+      favoriteJokes.add(joke);
+    });
   }
 
   @override
@@ -22,10 +32,25 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text('Joke Types'),
         actions: [
+          // Button to navigate to the Favorite Jokes Screen
+          IconButton(
+            icon: Icon(Icons.favorite),
+            onPressed: () {
+              // Navigate to FavoriteJokesScreen and pass the list of favorite jokes
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FavoriteJokesScreen(favoriteJokes: favoriteJokes),
+                ),
+              );
+            },
+          ),
+          // Button to get a random joke
           IconButton(
             icon: Icon(Icons.casino),
             onPressed: () async {
               final randomJoke = await ApiService.fetchRandomJoke();
+              addFavoriteJoke(randomJoke);  // Add the random joke to favorites
               Navigator.pushNamed(context, '/randomJoke', arguments: randomJoke);
             },
           ),
